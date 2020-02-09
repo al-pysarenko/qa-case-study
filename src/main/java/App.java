@@ -12,16 +12,16 @@ import java.util.stream.Stream;
 
 public class App {
 
-    static final String INPUT_FILE_NAME = "src/main/resources/test3.log";
+    static final String INPUT_FILE_NAME = "src/main/resources/test.log";
     static final Pattern MATCH_SERVICE_NAME = Pattern.compile("\\((.*?):");
     static final Pattern MATCH_REQUEST_ID = Pattern.compile("(.*?\\(.*?)(\\d+)");
     static final Pattern MATCH_DATE = Pattern.compile("(.*?)(.?TRACE)(.*)");
 
     public static void main(String[] args) throws IOException {
-        returnTotalNumberOfMatchingLines(INPUT_FILE_NAME);
+        parseLogFile(INPUT_FILE_NAME);
     }
 
-    public static void returnTotalNumberOfMatchingLines(String inputFile) throws IOException {
+    public static void parseLogFile(String inputFile) throws IOException {
         List<String> serviceNames;
         List<String> requestIds;
         List<String> listDates;
@@ -30,7 +30,7 @@ public class App {
 
         try (Stream<String> fileStream = Files.lines(Paths.get(inputFile))) {
             serviceNames = fileStream
-                    .map(x -> MATCH_SERVICE_NAME.matcher(x))
+                    .map(MATCH_SERVICE_NAME::matcher)
                     .filter(Matcher::find)
                     .map(x -> x.group(1))
                     .distinct()
@@ -41,7 +41,7 @@ public class App {
             try (Stream<String> fileStream = Files.lines(Paths.get(inputFile))) {
                 requestsNumber = fileStream
                         .filter(s -> s.contains(serviceName))
-                        .map(x -> MATCH_REQUEST_ID.matcher(x))
+                        .map(MATCH_REQUEST_ID::matcher)
                         .filter(Matcher::find)
                         .map(x -> x.group(2))
                         .distinct()
@@ -51,7 +51,7 @@ public class App {
             try (Stream<String> fileStream = Files.lines(Paths.get(inputFile))) {
                 requestIds = fileStream
                     .filter(s -> s.contains(serviceName))
-                    .map(x -> MATCH_REQUEST_ID.matcher(x))
+                    .map(MATCH_REQUEST_ID::matcher)
                     .filter(Matcher::find)
                     .map(x -> x.group(2))
                     .distinct()
@@ -65,7 +65,7 @@ public class App {
                 try (Stream<String> fileStream = Files.lines(Paths.get(inputFile))) {
                     listDates = fileStream
                                     .filter(s -> s.contains(IDs))
-                                    .map(x -> MATCH_DATE.matcher(x))
+                                    .map(MATCH_DATE::matcher)
                                     .filter(Matcher::find)
                                     .map(x -> x.group(1))
                                     .collect(Collectors.toList());
